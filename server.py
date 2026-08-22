@@ -4,9 +4,10 @@ from datetime import datetime
 from flask import Flask, send_from_directory, request, jsonify
 import plotly.graph_objects as go
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
 os.makedirs(DATA_DIR, exist_ok=True)
 
 FEEDBACK_FILE = os.path.join(DATA_DIR, 'feedback.json')
@@ -27,11 +28,18 @@ def save_json(filepath, data):
 
 @app.route('/')
 def serve_index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(BASE_DIR, 'index.html')
 
 @app.route('/healthz')
 def health_check():
     return jsonify({'status': 'healthy', 'service': 'chpl-fullstack-guide', 'timestamp': datetime.utcnow().isoformat()}), 200
+
+@app.route('/<path:filename>')
+def serve_static_files(filename):
+    file_path = os.path.join(BASE_DIR, filename)
+    if os.path.isfile(file_path):
+        return send_from_directory(BASE_DIR, filename)
+    return jsonify({'error': 'Not found'}), 404
 
 @app.route('/api/budget-data', methods=['GET'])
 def get_budget_data():
