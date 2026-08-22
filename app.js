@@ -658,12 +658,29 @@ function loadCreatorSettingsIntoDashboard() {
     }
   }
 
+  // Hero size
+  const savedHeroSize = localStorage.getItem('chpl_hero_size') || 'hero-size-large';
+  const heroSelect = document.getElementById('creator-hero-size-select');
+  if (heroSelect) {
+    heroSelect.value = savedHeroSize;
+  }
+
   // Announcement
   const annText = localStorage.getItem('chpl_creator_announcement') || '';
   document.getElementById('dash-announcement-input').value = annText;
 
   renderCustomCardsManager();
   renderInsertedImagesManager();
+}
+
+// Change Hero Card Size dynamically
+function changeHeroCardSize(sizeClass) {
+  const heroContent = document.querySelector('.hero-content');
+  if (heroContent) {
+    heroContent.classList.remove('hero-size-compact', 'hero-size-medium', 'hero-size-large', 'hero-size-xl');
+    heroContent.classList.add(sizeClass);
+  }
+  localStorage.setItem('chpl_hero_size', sizeClass);
 }
 
 // Preview & Save Section Toggles
@@ -992,6 +1009,10 @@ function resetCreatorSettingsToDefault() {
 
 // Master Creator Apply Function
 function applyCreatorSettings() {
+  // 0. Hero Size
+  const heroSize = localStorage.getItem('chpl_hero_size') || 'hero-size-large';
+  changeHeroCardSize(heroSize);
+
   // 1. Section Visibility
   const sections = JSON.parse(localStorage.getItem('chpl_section_visibility')) || DEFAULT_SECTIONS;
   for (const [secId, isVisible] of Object.entries(sections)) {
